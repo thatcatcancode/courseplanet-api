@@ -5,10 +5,28 @@ use Slim\Http\Response;
 
 // Routes
 
-$app->get('/[{name}]', function (Request $request, Response $response, array $args) {
-    // Sample log message
-    $this->logger->info("Slim-Skeleton '/' route");
+//Gets all registrations for admin view
+$app->get('/registrations', function ($request, $response, $args) {
+    $sth = $this->db->prepare("SELECT * FROM registration");
+    $sth->execute();
+    $registrations = $sth->fetchAll();
+        return $this->response->withJson($registrations);
+});
 
-    // Render index view
-    return $this->renderer->render($response, 'index.phtml', $args);
+//Gets all registrations for course 
+$app->get('/registrations/course/[{id}]', function ($request, $response, $args) {
+    $sth = $this->db->prepare("SELECT * FROM registration WHERE course_id=:id");
+           $sth->bindParam("id", $args['id']);
+    $sth->execute();
+    $registrations = $sth->fetchAll();
+        return $this->response->withJson($registrations);
+});
+
+//Gets course by id
+$app->get('/course/[{id}]', function ($request, $response, $args) {
+    $sth = $this->db->prepare("SELECT * FROM course WHERE course_id=:id");
+           $sth->bindParam("id", $args['id']);
+    $sth->execute();
+    $courses = $sth->fetchObject();
+        return $this->response->withJson($courses);
 });
