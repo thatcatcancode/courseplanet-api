@@ -1,10 +1,3 @@
-Download mysql database open source edition 
-Will need to create an oracle account to sign in and download
-Take note of the password when first installing
-To verify installation, run the following command:
-/usr/local/mysql/bin/mysql -uroot -p
-Will be prompted for the root password
-Download and install mySQL Work Bench
 # Course Planet Api 
 
 This application uses the latest Slim 3 framework api. It also uses the Monolog logger.
@@ -22,7 +15,7 @@ This application uses the latest Slim 3 framework api. It also uses the Monolog 
 	6. Download and install mySQL Work Bench
 	7. Create account called "dev" with same password in `/src/settings`
 	8. Create schema named `cp`
-	8. Run scripts in `/db_scripts` folder
+	9. Run scripts in `/db_scripts` folder
 
 ## Install 
 

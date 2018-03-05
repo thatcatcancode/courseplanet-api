@@ -3,6 +3,20 @@
 use Slim\Http\Request;
 use Slim\Http\Response;
 
+//CORS
+$app->options('/{routes:.+}', function ($request, $response, $args) {
+    return $response;
+});
+
+$app->add(function ($req, $res, $next) {
+    $response = $next($req, $res);
+    return $response
+            ->withHeader('Access-Control-Allow-Origin', 'http://localhost:4200')
+            //->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+            ->withHeader('Access-Control-Allow-Headers', '*')
+            ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+});
+
 // Routes
 
 //Gets all registrations for admin view
@@ -29,6 +43,16 @@ $app->get('/course/[{id}]', function ($request, $response, $args) {
     $sth->execute();
     $courses = $sth->fetchObject();
         return $this->response->withJson($courses);
+});
+
+
+
+
+// Catch-all route to serve a 404 Not Found page if none of the routes match
+// NOTE: make sure this route is defined last
+$app->map(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], '/{routes:.+}', function($req, $res) {
+    $handler = $this->notFoundHandler; // handle using the default Slim page not found handler
+    return $handler($req, $res);
 });
 
 // // get all todos
