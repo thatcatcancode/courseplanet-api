@@ -43,10 +43,9 @@ $app->get('/course/[{id}]', function ($request, $response, $args) {
     $sth = $this->db->prepare("SELECT * FROM course WHERE course_id=:id");
            $sth->bindParam("id", $args['id']);
     $sth->execute();
-    $courses = $sth->fetchObject();
-        return $this->response->withJson($courses);
+    $course = $sth->fetchObject();
+        return $this->response->withJson($course);
 });
-
 
 $app->post('/pay', function ($request, $response) {
     $input = $request->getParsedBody();
@@ -58,12 +57,16 @@ $app->post('/pay', function ($request, $response) {
     $amount = $input['amount'];
     
     //get course by id 
+    $sth = $this->db->prepare("SELECT * FROM course WHERE course_id=:id");
+    $sth->bindParam("id", $courseId);
+    $sth->execute();
+    $course = $sth->fetchObject();
     
     // Charge the user's card:
     $charge = \Stripe\Charge::create(array(
     "amount" => $amount,
     "currency" => "usd",
-    "description" => "Example charge", //course.name
+    "description" => $course->{'name'},
     "source" => $token,
     ));
 
@@ -71,12 +74,13 @@ $app->post('/pay', function ($request, $response) {
     $sql = "INSERT INTO registration (course_id) VALUES ($courseId)";
     $sth = $this->db->prepare($sql);
     $sth->execute();
-    //$input['id'] = $this->db->lastInsertId();
-    // $sth = $this->db->prepare("SELECT * FROM registration WHERE course_id=:id");
-    // $sth->bindParam("id", $args['id']);
-    // $sth->execute();
-    // $registrations = $sth->fetchAll();
-        return $this->response->withJson($input);
+
+    //get registrations
+    $sth = $this->db->prepare("SELECT * FROM registration WHERE course_id=:id");
+    $sth->bindParam("id", $courseId);
+    $sth->execute();
+    $registrations = $sth->fetchAll();
+        return $this->response->withJson($registrations);
 
 });
 
