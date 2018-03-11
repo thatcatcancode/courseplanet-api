@@ -1,5 +1,7 @@
 <?php
 
+require_once('config.php');
+
 use Slim\Http\Request;
 use Slim\Http\Response;
 
@@ -45,6 +47,38 @@ $app->get('/course/[{id}]', function ($request, $response, $args) {
         return $this->response->withJson($courses);
 });
 
+
+$app->post('/pay', function ($request, $response) {
+    $input = $request->getParsedBody();
+
+    // Token is created using Checkout or Elements
+    // Get the payment token ID submitted by the form:
+    $token = $input['stripeToken'];
+    $courseId = $input['courseId'];
+    $amount = $input['amount'];
+    
+    //get course by id 
+    
+    // Charge the user's card:
+    $charge = \Stripe\Charge::create(array(
+    "amount" => $amount,
+    "currency" => "usd",
+    "description" => "Example charge", //course.name
+    "source" => $token,
+    ));
+
+    //increment registrations
+    $sql = "INSERT INTO registration (course_id) VALUES ($courseId)";
+    $sth = $this->db->prepare($sql);
+    $sth->execute();
+    //$input['id'] = $this->db->lastInsertId();
+    // $sth = $this->db->prepare("SELECT * FROM registration WHERE course_id=:id");
+    // $sth->bindParam("id", $args['id']);
+    // $sth->execute();
+    // $registrations = $sth->fetchAll();
+        return $this->response->withJson($input);
+
+});
 
 
 

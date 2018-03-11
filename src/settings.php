@@ -22,6 +22,6 @@ return [
             "dbname" => "cp",
             "user" => "dev",
             "pass" => "testing123!"
-        ],
+        ]
     ],
 ];
