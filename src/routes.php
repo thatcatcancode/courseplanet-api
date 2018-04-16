@@ -61,27 +61,54 @@ $app->post('/pay', function ($request, $response) {
     $sth->bindParam("id", $courseId);
     $sth->execute();
     $course = $sth->fetchObject();
-    
-    // Charge the user's card:
-    $charge = \Stripe\Charge::create(array(
-    "amount" => $amount,
-    "currency" => "usd",
-    "description" => $course->{'name'},
-    "source" => $token,
-    ));
 
-    //increment registrations
-    $sql = "INSERT INTO registration (course_id) VALUES ($courseId)";
-    $sth = $this->db->prepare($sql);
-    $sth->execute();
-
-    //get registrations
-    $sth = $this->db->prepare("SELECT * FROM registration WHERE course_id=:id");
-    $sth->bindParam("id", $courseId);
-    $sth->execute();
-    $registrations = $sth->fetchAll();
-        return $this->response->withJson($registrations);
-
+    if($course != null){
+        try {
+            // Charge the user's card:
+            $charge = \Stripe\Charge::create(array(
+                "amount" => $amount,
+                "currency" => "usd",
+                "description" => $course->{'name'},
+                "source" => $token,
+                ));
+            $success = 1;       
+        } catch (Stripe_InvalidRequestError $e) {
+          // Invalid parameters were supplied to Stripe's API
+          return $error = $e->getMessage();
+        } catch (Stripe_AuthenticationError $e) {
+          // Authentication with Stripe's API failed
+        } catch (Stripe_ApiConnectionError $e) {
+          // Network communication with Stripe failed
+        } catch (Stripe_Error $e) {
+          // Display a very generic error to the user, and maybe send
+          // yourself an email
+        } catch(Stripe_CardError $e) {
+            //Card was declined
+            //http://www.larryullman.com/2013/01/30/handling-stripe-errors/
+            $error = $e->getMessage();
+            return $error;
+            // $e_json = $e->getJsonBody();
+            // $error = $e_json['error'];
+            //  return $error['message'];
+        } catch (Exception $e) {
+          // Something else happened, completely unrelated to Stripe
+        }
+        
+        //if successful card charge... 
+        if ($success == 1){
+            //increment registrations
+            $sql = "INSERT INTO registration (course_id) VALUES ($courseId)";
+            $sth = $this->db->prepare($sql);
+            $sth->execute();
+        
+            //return registrations
+            $sth = $this->db->prepare("SELECT * FROM registration WHERE course_id=:id");
+            $sth->bindParam("id", $courseId);
+            $sth->execute();
+            $registrations = $sth->fetchAll();
+                return $this->response->withJson($registrations);
+        }
+    }
 });
 
 
