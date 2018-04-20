@@ -74,7 +74,7 @@ $app->post('/pay', function ($request, $response) {
             $success = 1;       
         } catch (Stripe_InvalidRequestError $e) {
           // Invalid parameters were supplied to Stripe's API
-          return $error = $e->getMessage();
+          throw $e;
         } catch (Stripe_AuthenticationError $e) {
           // Authentication with Stripe's API failed
         } catch (Stripe_ApiConnectionError $e) {
