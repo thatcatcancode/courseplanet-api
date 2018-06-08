@@ -77,11 +77,14 @@ $app->post('/pay', function ($request, $response) {
           throw $e;
         } catch (Stripe_AuthenticationError $e) {
           // Authentication with Stripe's API failed
+          throw $e;
         } catch (Stripe_ApiConnectionError $e) {
           // Network communication with Stripe failed
+          throw $e;
         } catch (Stripe_Error $e) {
           // Display a very generic error to the user, and maybe send
           // yourself an email
+          throw $e;
         } catch(Stripe_CardError $e) {
             //Card was declined
             //http://www.larryullman.com/2013/01/30/handling-stripe-errors/
@@ -90,8 +93,10 @@ $app->post('/pay', function ($request, $response) {
             // $e_json = $e->getJsonBody();
             // $error = $e_json['error'];
             //  return $error['message'];
+            throw $e;
         } catch (Exception $e) {
           // Something else happened, completely unrelated to Stripe
+          throw $e;
         }
         
         //if successful card charge... 
